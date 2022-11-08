@@ -10,14 +10,18 @@ import "./assets/css/demo.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import AdminLayout from "layouts/Admin.js";
+import { Provider } from "react-redux";
+import { store } from "store/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="bank/*" element={<AdminLayout/>} />
-      <Route path="*" element={<Navigate to="/bank/dashboard" replace />}/>
-    </Routes>
-  </BrowserRouter>
+  <Provider store={ store }>
+    <BrowserRouter>
+      <Routes>
+        <Route path="bank/*" element={<AdminLayout/>} />
+        <Route path="*" element={<Navigate to="/bank/dashboard" replace />}/>
+      </Routes>
+    </BrowserRouter>
+  </Provider>
 );
