@@ -23,17 +23,26 @@ import Footer from "components/Footer/Footer";
 import Sidebar from "components/Sidebar/Sidebar";
 
 import routes from "routes.js";
+import { getApiContentThunk } from "store/appSlice";
+import { useAppDispatch } from "hooks/reduxHooks";
+import { useAppSelector } from "hooks/reduxHooks";
+import { getUserContentThunk } from "store/userAccount";
 
-import sidebarImage from "assets/img/sidebar-3.jpg";
+// import sidebarImage from "assets/img/sidebar-3.jpg";
 
 function Admin() {
-  const [ image ] = React.useState(sidebarImage);
-  const [ hasImage ] = React.useState(true);
+  const dispatch = useAppDispatch();
+
+  const { id } = useAppSelector((state) => state.user.user);
+  const contentAppFetched = useAppSelector((state) => state.app.fetched);
+  const contentUserFetched = useAppSelector((state) => state.user.userFetched);
+
   const location = useLocation();
   const mainPanel = React.useRef(null);
+
   const getRoutes = (routes) => {
     return routes.map((prop, key) => {
-      if (prop.layout === "/bank") {
+      if (prop.layout === "/budget") {
         return (
           <Route
             path={prop.path}
@@ -46,6 +55,24 @@ function Admin() {
       }
     });
   };
+
+  React.useEffect(() => {
+    dispatch( getApiContentThunk() );
+    dispatch( getUserContentThunk( id ) );
+  }, []);
+
+  React.useEffect(() => {
+    if(contentUserFetched === false){
+      dispatch( getUserContentThunk( id ) );
+    }
+  }, [location]);
+
+  React.useEffect(() => {
+    if(contentAppFetched === false){
+      dispatch( getApiContentThunk() );
+    }
+  }, [location]);
+
   React.useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
@@ -59,10 +86,11 @@ function Admin() {
       element.parentNode.removeChild(element);
     }
   }, [location]);
+
   return (
     <>
       <div className="wrapper">
-        <Sidebar color="black" image={hasImage ? image : ""} routes={routes} />
+        <Sidebar color="black" routes={routes} />
         <div className="main-panel" ref={mainPanel}>
           <AdminNavbar />
           <div className="content">

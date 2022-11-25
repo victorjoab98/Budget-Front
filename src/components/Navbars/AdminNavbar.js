@@ -3,8 +3,11 @@ import { useLocation } from "react-router-dom";
 import { Navbar, Container, Nav, Dropdown, Button } from "react-bootstrap";
 
 import routes from "routes.js";
+import { useAppDispatch } from "hooks/reduxHooks";
+import { logoutThunk } from "store/userAccount";
 
 function Header() {
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const mobileSidebarToggle = (e) => {
     e.preventDefault();
@@ -26,6 +29,10 @@ function Header() {
     }
     return "Brand";
   };
+
+  const handlerLogout = () =>{
+    dispatch(logoutThunk())
+  }
   return (
     <Navbar bg="light" expand="lg">
       <Container fluid>
@@ -181,7 +188,9 @@ function Header() {
                 href="#pablo"
                 onClick={(e) => e.preventDefault()}
               >
-                <span className="no-icon">Log out</span>
+                <span
+                  onClick={handlerLogout}
+                  className="no-icon">Log out</span>
               </Nav.Link>
             </Nav.Item>
           </Nav>

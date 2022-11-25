@@ -33,7 +33,7 @@ function Sidebar({ color, image, routes }) {
         </div>
         <Nav>
           {routes.map((prop, key) => {
-            if (!prop.redirect)
+            if (!prop.redirect && prop.sidebar)
               return (
                 <li
                   className={
