@@ -5,25 +5,25 @@ import { getRecordsByUserId } from 'store/userAccount';
 import { limitPaginationForRecords } from 'utils/constants';
 
 function withLastRecords(RecordList){
-  return function LisRecordsWithLastRecords(){
+  return function LisRecordsWithLastRecords({ date1, date2 }){
 
     const [ records, setRecords] = useState([]);
     const [ totalPages, setTotalPages ] = useState(0);
-    const { id } = useAppSelector( state => state.user.user );
+    const id  = useAppSelector( state => state.user.user.customerId );
 
     useEffect(() => {
-      getRecordsByUserId( id, limitPaginationForRecords, 0 )
+      getRecordsByUserId( id, date1, date2, limitPaginationForRecords, 0 )
       .then( res => {
         setRecords(res.data.records);
         setTotalPages(res.data.totalPages);
       }).catch( err => {
         console.log(err);
       })
-    }, []);
+    }, [date1, date2]);
 
     const handlePageClick = async (data) => {
       let currentPage = data.selected + 1;  
-      getRecordsByUserId( id, limitPaginationForRecords, (currentPage - 1) * limitPaginationForRecords )
+      getRecordsByUserId( id, date1, date2, limitPaginationForRecords, (currentPage - 1) * limitPaginationForRecords )
       .then( res => {
         setRecords(res.data.records);
       }).catch( err => {
@@ -53,7 +53,7 @@ function withLastRecords(RecordList){
     />
 
     return (
-      <RecordList title="Your last Records" records={records} pagination={pagination} />
+      <RecordList title="Your Records" records={records} pagination={pagination} />
     )
 }}
 

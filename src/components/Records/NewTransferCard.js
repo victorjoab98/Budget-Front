@@ -63,7 +63,7 @@ export const NewTransferCard = () => {
         return;
     }
 
-    dispatch(newTransfer( { ...values, customerId: user.id } ) )
+    dispatch(newTransfer( { ...values, customerId: user.customerId },  user.customerId ) )
     .then( res => {
       console.log(res)
       setResponse( { variant: 'success', message: res.data.message } );
@@ -111,7 +111,8 @@ export const NewTransferCard = () => {
                     value={values.sourceAccountId}
                     onChange={handleInputChange}
                     isInvalid={ !!errors.sourceAccountId }
-                    as="select">
+                    as="select"
+                    disabled={ response.variant === 'success'}>
                       <option key="default" value="default" hidden>Select your source account.</option>
                       { bankAccounts.map((account) => (
                         <option key={account.id} value={account.id}>{account.numberAccount} - {account.bank.name} ( {account.currency.symbol}{account.balance} )</option>
@@ -134,6 +135,7 @@ export const NewTransferCard = () => {
                         onChange={ handleInputChange }
                         type="number"
                         isInvalid={ !!errors.destinationNumberAccount }
+                        disabled={ response.variant === 'success'}
                     />
                     <FormFeedback>
                         { errors.destinationNumberAccount }
@@ -148,7 +150,8 @@ export const NewTransferCard = () => {
                         value={values.bankId}
                         onChange={handleInputChange}
                         as="select"
-                        isInvalid={ !!errors.bankId }>
+                        isInvalid={ !!errors.bankId }
+                        disabled={ response.variant === 'success'}>
                         <option value="default" disabled>Select the bank of the destination account.</option>
                         {renderBanks()}
                     </Form.Control>
@@ -174,6 +177,7 @@ export const NewTransferCard = () => {
                         value={values.amount}
                         onChange={handleInputChange}
                         isInvalid={!!errors.amount}
+                        disabled={ response.variant === 'success'}
                         >
                         </Form.Control>
                         { (account && account.currency) ? account.currency.code : '' }
@@ -193,7 +197,7 @@ export const NewTransferCard = () => {
                         onChange={handleInputChange}
                         placeholder="Insert a short description of this record."
                         type="text"
-                        required
+                        disabled={ response.variant === 'success'}
                     />
                   </Form.Group>
                 </Col>
@@ -201,7 +205,10 @@ export const NewTransferCard = () => {
             <Row className='mt-2'>
                 <Col className='text-right'>
                   { response.loading && <Spinner className='mr-2' animation="border"/>}
-                  <Button onClick={handleTransfer}>Continue</Button>
+                  <Button
+                    disabled={response.variant === 'success'}
+                    className='btn-fill mt-2'
+                    onClick={handleTransfer}>Do Transfer</Button>
                 </Col>
             </Row>
         </Card.Body>

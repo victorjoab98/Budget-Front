@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import validator from 'validator';
 import { Alert, Button, Card, Col, Container, Form, Navbar, Row, Spinner } from 'react-bootstrap'
 import { useNavigate } from 'react-router';
@@ -8,9 +8,11 @@ import { isObjectEmpy } from 'utils/helpers';
 import { useAppDispatch } from 'hooks/reduxHooks';
 import { loginUserThunk } from 'store/userAccount';
 import './css/Login.css';
+import { useAppSelector } from 'hooks/reduxHooks';
 
 export const Login = () => {
 
+  const logged = useAppSelector( state => state.user.logged );
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [ values, , handleInputChange ] = useForm({
@@ -25,6 +27,12 @@ export const Login = () => {
     paddingInline: "4%"
   }
 
+  useEffect( () => {
+    if ( logged === true ) {
+      navigate('/budget/dashboard');
+    }
+  }, [logged]);
+
   const handleLogin = () => {
     setErrors({});
     setResponse({ loading : true });
@@ -38,7 +46,6 @@ export const Login = () => {
 
     dispatch( loginUserThunk( values ) )
     .then( res => {
-        console.log(res);
         setResponse({});
     }).catch( err => {
         console.log(err)

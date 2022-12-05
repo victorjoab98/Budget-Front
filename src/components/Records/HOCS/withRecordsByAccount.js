@@ -4,24 +4,24 @@ import { getRecordsByAccounId } from 'store/userAccount';
 import { limitPaginationForRecords } from 'utils/constants';
 
 function withRecordsByAccount(RecordList){
-  return function LisRecordsWithRecordsByAccount({ accountId }){
+  return function LisRecordsWithRecordsByAccount({ accountId, date1, date2 }){
 
     const [ records, setRecords] = useState([]);
     const [ totalPages, setTotalPages ] = useState(0);
 
     useEffect(() => {
-      getRecordsByAccounId( accountId, limitPaginationForRecords, 0 )
+      getRecordsByAccounId( accountId, date1, date2, limitPaginationForRecords, 0 )
       .then( res => {
         setRecords(res.data.records);
         setTotalPages(res.data.totalPages);
       }).catch( err => {
         console.log(err);
       })
-    }, [accountId]);
+    }, [accountId, date1, date2]);
 
     const handlePageClick = async (data) => {
       let currentPage = data.selected + 1;  
-      getRecordsByAccounId( accountId, limitPaginationForRecords, ( currentPage - 1 ) * limitPaginationForRecords )
+      getRecordsByAccounId( accountId, date1, date2, limitPaginationForRecords, ( currentPage - 1 ) * limitPaginationForRecords )
       .then( res => {
         setRecords(res.data.records);
       }).catch( err => {
@@ -51,7 +51,7 @@ function withRecordsByAccount(RecordList){
     />
 
     return (
-      <RecordList title="Records" records={records} pagination={pagination} />
+      <RecordList title="Records By Account" records={records} pagination={pagination} />
     )
 }}
 

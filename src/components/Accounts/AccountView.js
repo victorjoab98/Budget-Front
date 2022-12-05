@@ -37,16 +37,12 @@ export const AccountView = () => {
         setResponse({});
         return;
     }
-    console.log(account.id, newBalance, user.id);
 
-    dispatch( updateAccountThunk( account.id, newBalance, user.id ) )
+    dispatch( updateAccountThunk( account.id, newBalance, user.customerId ) )
     .then( res => {
-        console.log( res )
         setResponse({ variant: 'success', message: res.data.message })
     }).catch( err => {
-        console.log(err)
         setResponse({ variant: 'danger', message: err.response.data.message || 'Error in operation.' })
-
     })
   }
 
@@ -128,7 +124,7 @@ export const AccountView = () => {
                         onClick={()=>setEditBalance(false)}
                         className='btn-fill mt-2 ml-1'
                         variant='danger'
-                        size="md">Cancel</Button>
+                        size="md">Close</Button>
                   </Col>
                 </Row>
                 }

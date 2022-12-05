@@ -12,7 +12,7 @@ import { useAppDispatch } from 'hooks/reduxHooks';
 export const NewRecordCard = ( { recordType = 'Income' } ) => {
 
   const dispatch = useAppDispatch();
-  const { id } = useAppSelector( state => state.user.user );
+  const  id  = useAppSelector( state => state.user.user.customerId );
   const accounts = useAppSelector((state) => state.user.accounts);
   const recordTypes = useAppSelector((state) => state.app.recordTypes);
   const [ categories ] = useCategories(recordType);
@@ -99,6 +99,7 @@ export const NewRecordCard = ( { recordType = 'Income' } ) => {
                     name="accountId"
                     value={values.accountId}
                     onChange={handleInputChange}
+                    disabled={ response.variant === 'success'}
                     as="select">
                       { accounts.map((account) => (
                         <option key={account.id} value={account.id}>{account.numberAccount} - {account.bank.name} ({account.currency.symbol}{account.balance})</option>
@@ -114,6 +115,7 @@ export const NewRecordCard = ( { recordType = 'Income' } ) => {
                     value={values.categoryId}
                     onChange={handleInputChange}
                     as="select"
+                    disabled={ response.variant === 'success'}
                     isInvalid={ !!errors.categoryId }>
                       { categories.map((category) => (
                         <option key={category.id} value={category.id}>{category.name}</option>
@@ -140,6 +142,7 @@ export const NewRecordCard = ( { recordType = 'Income' } ) => {
                         placeholder='0'
                         value={values.amount}
                         onChange={handleInputChange}
+                        disabled={ response.variant === 'success'}
                         isInvalid={!!errors.amount}>
                         </Form.Control>
                         { (account && account.currency) ? account.currency.code : '' }
@@ -158,7 +161,7 @@ export const NewRecordCard = ( { recordType = 'Income' } ) => {
                         onChange={handleInputChange}
                         placeholder="Insert a short description of this record."
                         type="text"
-                        required
+                        disabled={ response.variant === 'success'}
                     />
                   </Form.Group>
                 </Col>

@@ -14,8 +14,11 @@ import { Provider } from "react-redux";
 import { store } from "store/store";
 import { Login } from "views/Login";
 import { Register } from "views/Register";
+import { checkForToken } from "utils/checkForToken";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+
+checkForToken();
 
 root.render(
   <Provider store={ store }>
@@ -24,7 +27,6 @@ root.render(
         <Route path="budget/*" element={<AdminLayout/>} />
         <Route path="budget/login" element={<Login/>}/>
         <Route path="budget/register" element={<Register/>}/>
-
         <Route path="*" element={<Navigate to="/budget/dashboard" replace />}/>
       </Routes>
     </BrowserRouter>

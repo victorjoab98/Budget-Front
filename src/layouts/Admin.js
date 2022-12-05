@@ -16,7 +16,7 @@
 
 */
 import React from "react";
-import { useLocation, Route, Routes } from "react-router-dom";
+import { useLocation, Route, Routes, useNavigate } from "react-router-dom";
 
 import AdminNavbar from "components/Navbars/AdminNavbar";
 import Footer from "components/Footer/Footer";
@@ -33,7 +33,9 @@ import { getUserContentThunk } from "store/userAccount";
 function Admin() {
   const dispatch = useAppDispatch();
 
-  const { id } = useAppSelector((state) => state.user.user);
+  const navigate = useNavigate();
+  const logged = useAppSelector( state => state.user.logged );
+  const { customerId } = useAppSelector((state) => state.user.user);
   const contentAppFetched = useAppSelector((state) => state.app.fetched);
   const contentUserFetched = useAppSelector((state) => state.user.userFetched);
 
@@ -57,18 +59,26 @@ function Admin() {
   };
 
   React.useEffect(() => {
-    dispatch( getApiContentThunk() );
-    dispatch( getUserContentThunk( id ) );
+    if(logged === true ){
+      dispatch( getApiContentThunk() );
+      dispatch( getUserContentThunk( customerId ) );
+    }
   }, []);
 
   React.useEffect(() => {
-    if(contentUserFetched === false){
-      dispatch( getUserContentThunk( id ) );
+    if(logged === false ){
+      navigate('/budget/login');
+    }
+  }, [location, logged]);
+
+  React.useEffect(() => {
+    if( logged === true && contentUserFetched === false){
+      dispatch( getUserContentThunk( customerId ) );
     }
   }, [location]);
 
   React.useEffect(() => {
-    if(contentAppFetched === false){
+    if( logged === true && contentAppFetched === false){
       dispatch( getApiContentThunk() );
     }
   }, [location]);

@@ -27,7 +27,7 @@ export const NewAccountForm = () => {
   const dispatch = useAppDispatch();
   const banks = useAppSelector( state => state.app.banks );
   const currencies = useAppSelector( state => state.app.currencies );
-  const { id } = useAppSelector( state => state.user.user );
+  const  id  = useAppSelector( state => state.user.user.customerId );
 
   useEffect(()=>{
     if( !banks || banks.length < 1 ){

@@ -1,13 +1,23 @@
-import { useForm } from 'hooks/useForm';
-import React, { useState } from 'react'
-import { Button, Card, Col, Container, Form, Navbar, Row } from 'react-bootstrap'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
+import { Alert, Button, Card, Col, Container, Form, Navbar, Row, Spinner } from 'react-bootstrap'
 import { FormFeedback } from 'reactstrap';
+import validator from 'validator';
+import { useAppSelector } from 'hooks/reduxHooks';
+import { useForm } from 'hooks/useForm';
 import './css/Login.css';
+import { isObjectEmpy } from 'utils/helpers';
+import { useAppDispatch } from 'hooks/reduxHooks';
+import { getCurrencyThunk } from 'store/appSlice';
+import { registerUserThunk } from 'store/userAccount';
 
 export const Register = () => {
 
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const currencies = useAppSelector( state => state.app.currencies );
+  const logged = useAppSelector( state => state.user.logged );
+  const [ response, setResponse ] = useState({});
   const [ errors, setErrors ] = useState({});
   const [ values, , handleInputChange ] = useForm({
     name: '',
@@ -17,6 +27,16 @@ export const Register = () => {
     preferredCurrency: 'default'
   });
 
+  useEffect( ()=>{
+    dispatch( getCurrencyThunk() );
+  }, [])
+
+  useEffect( () => {
+    if ( logged === true ) {
+      navigate('/budget/dashboard');
+    }
+  }, [logged]);
+
   const redirectToLogIn = () => {
     navigate('/budget/login');
   }
@@ -24,6 +44,62 @@ export const Register = () => {
   const style = {
     boxShadow: "0 5px 8px 0 rgba(0, 0, 0, 0.2), 0 9px 26px 0 rgba(0, 0, 0, 0.19)",
     paddingInline: "4%"
+  }
+
+
+  const handleRegister = () => {
+    setResponse({ loading: true});
+    setErrors({});
+    const validationsErrors = checkInputs();
+    if( !isObjectEmpy(validationsErrors) ){
+      setErrors( validationsErrors );
+      setResponse({});
+      return;
+    }
+
+    const userBody = {
+      name: values.name,
+      email: values.email,
+      preferredCurrency: values.preferredCurrency,
+      userData: {
+        username: values.username,
+        password: values.password
+      }
+    }
+
+    dispatch( registerUserThunk( userBody ) )
+    .then( res => setResponse({ variant: 'success', message: 'User registered successfully.' }) )
+    .catch( err => setResponse({ variant: 'danger', message: err.response.data.message }) )
+  }
+
+  const checkInputs = () => {
+    const errors = {};
+
+    if( validator.isEmpty( values.name ) ){
+      errors.name = 'Name is required.';
+    }
+
+    if( validator.isEmpty( values.email ) ){
+      errors.email = 'Email is required.';
+    }else{
+      if( !validator.isEmail( values.email ) ){
+        errors.email = 'Please insert a valid email.';
+      }
+    }
+
+    if( validator.isEmpty( values.username ) ){
+      errors.username = 'Username is required.';
+    }
+
+    if( !validator.isLength( values.password, { min: 5, max: 15 } ) ){
+      errors.password = 'Password is required and must be min 5 to max 15 carachters.';
+    }
+
+    if( values.preferredCurrency === 'default' ){
+      errors.preferredCurrency = 'Preferred currency is required.';
+    }
+
+    return errors;
   }
 
   return (
@@ -39,6 +115,7 @@ export const Register = () => {
               <h3>Budget-Wallet</h3>
             </Card.Header>
             <Card.Body>
+              { response.message && <Alert variant={response.variant}><strong>{response.message}</strong></Alert>}
               <Row>
                 <Col md="12">
                   <Form.Group>
@@ -48,7 +125,8 @@ export const Register = () => {
                         name="name"
                         value={values.name}
                         onChange={handleInputChange}
-                        isInvalid={!!errors.name}>
+                        isInvalid={!!errors.name}
+                        required>
                     </Form.Control>
                     <FormFeedback>
                       { errors.name }
@@ -63,7 +141,8 @@ export const Register = () => {
                         name="email"
                         value={values.email}
                         onChange={handleInputChange}
-                        isInvalid={!!errors.email}>
+                        isInvalid={!!errors.email}
+                        required>
                     </Form.Control>
                     <FormFeedback>
                       { errors.email }
@@ -113,7 +192,12 @@ export const Register = () => {
                         value={values.preferredCurrency}
                         onChange={handleInputChange}
                         isInvalid={!!errors.preferredCurrency}>
-                      <option key="default" value="default" hidden>Select your preferred currency.</option>
+                      <option key="default" value="default" disabled>Select your preferred currency.</option>
+                      {
+                        currencies.map( currency => 
+                          <option key={currency.id} value={currency.id}>{currency.name} - {currency.code}</option>
+                        )
+                      }
                     </Form.Control>
                     <FormFeedback>
                       { errors.preferredCurrency }
@@ -123,10 +207,17 @@ export const Register = () => {
               </Row>
               <Row className='mt-4' >
                 <Col md="12" className='text-center'>
-                    <Button
-                    className='btn-fill'>
-                        Sign Up
-                    </Button>
+                  {
+                    response.loading && <Spinner className='mr-2' 
+                    variant='primary'
+                    animation='border'/>
+                  }
+                  
+                  <Button
+                  onClick={handleRegister}
+                  className='btn-fill'>
+                      Sign Up
+                  </Button>
                 </Col>
               </Row>
             </Card.Body>

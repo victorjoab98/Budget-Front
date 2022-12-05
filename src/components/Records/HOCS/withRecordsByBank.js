@@ -5,25 +5,25 @@ import { getRecordsByBank } from 'store/userAccount';
 import { limitPaginationForRecords } from 'utils/constants';
 
 function withRecordsByBank(RecordList){
-  return function LisRecordsWithRecordsByBank({ bankId }){
+  return function LisRecordsWithRecordsByBank({ bankId, date1, date2  }){
 
-    const { id } = useAppSelector( state => state.user.user );
+    const  id  = useAppSelector( state => state.user.user.customerId );
     const [ records, setRecords] = useState([]);
     const [ totalPages, setTotalPages ] = useState(0);
 
     useEffect(() => {
-      getRecordsByBank( id, bankId, limitPaginationForRecords, 0 )
+      getRecordsByBank( id, bankId, date1, date2, limitPaginationForRecords, 0 )
       .then( res => {
         setRecords(res.data.records);
         setTotalPages(res.data.totalPages);
       }).catch( err => {
         console.log(err);
       })
-    }, [bankId]);
+    }, [bankId, date1, date2 ]);
 
     const handlePageClick = async (data) => {
       let currentPage = data.selected + 1;  
-      getRecordsByBank( id, bankId, limitPaginationForRecords, (currentPage - 1) * limitPaginationForRecords )
+      getRecordsByBank( id, bankId, date1, date2, limitPaginationForRecords, (currentPage - 1) * limitPaginationForRecords )
       .then( res => {
         setRecords(res.data.records);
       }).catch( err => {
@@ -53,7 +53,7 @@ function withRecordsByBank(RecordList){
     />
 
     return (
-      <RecordList title="Your last Records" records={records} pagination={pagination} />
+      <RecordList title="Records By Bank" records={records} pagination={pagination} />
     )
 }}
 

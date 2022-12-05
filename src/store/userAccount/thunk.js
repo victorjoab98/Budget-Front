@@ -1,5 +1,5 @@
 import { api } from "../../api/axios";
-import { setAccounts, setUserFetched, setUserId } from "./userAccountSlice";
+import { setAccounts, setUserFetched, setUser, setUserLogged, clearState, setRecordPercentages, setShowWelcome } from "./userAccountSlice";
 
 export const loginUserThunk = ({ username, password }) =>  dispatch => {
     return new Promise ( (resolve, reject)  => {
@@ -9,7 +9,38 @@ export const loginUserThunk = ({ username, password }) =>  dispatch => {
             const { user } = res.data;
             resolve(res);
             localStorage.setItem( 'user_token', token );
-            dispatch( setUserId( user.customer.id ));
+            dispatch( setUser({ 
+                id: user.id, 
+                name: user.customer.name,
+                email: user.customer.email,
+                username: user.username, 
+                customerId: user.customer.id }) );
+            dispatch( setShowWelcome(true) );
+            dispatch( setUserLogged(true) );
+            dispatch( getUserContentThunk( user.customer.id ) );
+        })
+        .catch( err=> reject(err) )
+    })
+}
+
+export const registerUserThunk = ( userBody ) =>  dispatch => {
+    return new Promise ( (resolve, reject)  => {
+        api.post( '/customer/register', userBody )
+        .then( res => {
+            const { token } = res.data;
+            const { user } = res.data;
+            resolve(res);
+            localStorage.setItem( 'user_token', token );
+            dispatch( setUser({ 
+                id: user.id,
+                isNewUser: true, 
+                name: user.customer.name,
+                email: user.customer.email,
+                username: user.username, 
+                customerId: user.customer.id }) );
+
+            dispatch( setShowWelcome(true) );
+            dispatch( setUserLogged(true) );
             dispatch( getUserContentThunk( user.customer.id ) );
         })
         .catch( err=> reject(err) )
@@ -18,19 +49,19 @@ export const loginUserThunk = ({ username, password }) =>  dispatch => {
 
 export const logoutThunk = () => dispatch => {
   localStorage.setItem('user_token', '');
-  dispatch( clearState );
+  dispatch( clearState() );
 } 
 
 export const getUserContentThunk = ( userId ) => {
     return async ( dispatch ) => {
         try {
-            console.log(' called: getUserContentThunk');
-
             const res = await api(`/customer/get/all/${ userId }`);
             const {data} = res;
             const { accounts } = data;
+            const { recordsPercentages } = data;
 
             dispatch( setAccounts( accounts ) );
+            dispatch( setRecordPercentages( recordsPercentages ) );
             dispatch( setUserFetched( true ) );
 
         } catch (error) {
@@ -42,7 +73,6 @@ export const getUserContentThunk = ( userId ) => {
 export const getAccountsThunk = ( userId ) => {
     return async ( dispatch ) => {
         try {
-            console.log(' called: getAccountsThunk');
             const res = await api(`/account/myaccounts/${userId}`);
             const {data} = res;
             dispatch( setAccounts( data ) );
@@ -108,10 +138,10 @@ export const addRecordThunk = ( record, userId ) => dispatch => {
     })   
 };
 
-export const getRecordsByUserId = ( userId, limit = 10, offset = 0  ) => {
+export const getRecordsByUserId = ( userId, date1, date2, limit = 10, offset = 0  ) => {
     return new Promise ( (resolve, reject)  => {
         
-        api.get(`/records/user/${ userId }`, { params: { limit, offset } })
+        api.get(`/records/user/${ userId }`, { params: { limit, offset, date1, date2 } })
         .then( res => {
             resolve(res);
         })
@@ -121,10 +151,10 @@ export const getRecordsByUserId = ( userId, limit = 10, offset = 0  ) => {
     }) 
 };
 
-export const getRecordsByAccounId = ( accountId, limit = 10, offset = 0  ) => {
+export const getRecordsByAccounId = ( accountId, date1, date2, limit = 10, offset = 0  ) => {
     return new Promise ( (resolve, reject)  => {
         
-        api.get(`/records/account/${ accountId }`, { params: { limit, offset } })
+        api.get(`/records/account/${ accountId }`, { params: { limit, offset, date1, date2 } })
         .then( res => {
             resolve(res);
         })
@@ -134,10 +164,10 @@ export const getRecordsByAccounId = ( accountId, limit = 10, offset = 0  ) => {
     }) 
 };
 
-export const getRecordsByBank = ( userId, bankId, limit = 10, offset = 0  ) => {
+export const getRecordsByBank = ( userId, bankId, date1, date2, limit = 10, offset = 0  ) => {
     return new Promise ( (resolve, reject)  => {
         
-        api.get(`/records/bank/${ bankId }/user/${ userId }`, { params: { limit, offset } })
+        api.get(`/records/bank/${ bankId }/user/${ userId }`, { params: { limit, offset, date1, date2  } })
         .then( res => {
             resolve(res);
         })
